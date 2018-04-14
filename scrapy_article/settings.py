@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import os
 # Scrapy settings for scrapy_article project
 #
 # For simplicity, this file contains only settings considered important or
@@ -64,10 +64,16 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'scrapy_article.pipelines.ScrapyArticlePipeline': 300,
-#}
+ITEM_PIPELINES = {
+   # 'scrapy_article.pipelines.ScrapyArticlePipeline': 300,
+    # 'scrapy.pipelines.images.ImagesPipeline': 1,
+    'scrapy_article.pipelines.ImageJobbolePipeline': 1,
+    'scrapy_article.pipelines.JsonJobbolePipline': 10,
 
+}
+IMAGES_RESULT_FIELD = 'front_image_path'
+IMAGES_URLS_FIELD = 'front_image_url'
+IMAGES_STORE = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'images')
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

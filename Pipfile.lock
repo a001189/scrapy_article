@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2428d036fa063ab478c3be2f42c0e4b98b2b450d7291a8e44bbf2cf985dbfb88"
+            "sha256": "0ca9e32e9575c0aea71c2da1780ae5d7c6d3ce957b25965aaee4d4ce304fd89f"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -82,9 +82,17 @@
             "hashes": [],
             "version": "==4.2.1"
         },
+        "mysqlclient": {
+            "hashes": [],
+            "version": "==1.3.12"
+        },
         "parsel": {
             "hashes": [],
             "version": "==1.4.0"
+        },
+        "pillow": {
+            "hashes": [],
+            "version": "==5.1.0"
         },
         "pyasn1": {
             "hashes": [],
