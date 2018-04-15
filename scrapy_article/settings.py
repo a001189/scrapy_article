@@ -68,8 +68,10 @@ ITEM_PIPELINES = {
    # 'scrapy_article.pipelines.ScrapyArticlePipeline': 300,
     # 'scrapy.pipelines.images.ImagesPipeline': 1,
     'scrapy_article.pipelines.ImageJobbolePipeline': 1,
-    'scrapy_article.pipelines.JsonJobbolePipline': 10,
-
+    # 'scrapy_article.pipelines.JsonJobbolePipline': 10,
+    # 'scrapy_article.pipelines.JsonJobboleExportPipline': 10,
+    # 'scrapy_article.pipelines.MysqlPipeline': 10,
+    'scrapy_article.pipelines.MysqlTwistedPipeline': 10,
 }
 IMAGES_RESULT_FIELD = 'front_image_path'
 IMAGES_URLS_FIELD = 'front_image_url'
@@ -94,3 +96,12 @@ IMAGES_STORE = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'image
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+MYSQL_INFO = dict(
+    host='rm-uf69d6mp154aocu5tbo.mysql.rds.aliyuncs.com',
+    user='root',
+    password='123QWEqwe',
+    db='article_spider',
+    charset='utf8',
+    use_unicode=True,
+    )
