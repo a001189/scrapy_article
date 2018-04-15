@@ -101,6 +101,11 @@ class MysqlTwistedPipeline:
         mysql_info = setting['MYSQL_INFO']
         mysql_info['cursorclass'] = DictCursor
         dbpool = adbapi.ConnectionPool('MySQLdb', **mysql_info)
+        # 增加创建表 未测试是否kexing
+        try:
+            dbpool.runInteraction(cls.create_table)
+        except Exception as e:
+            print(e)
         return cls(dbpool)
 
     def __init__(self, dbpool):
@@ -136,3 +141,24 @@ class MysqlTwistedPipeline:
                     VALUES({1})
                 """.format(col_names, num_s)  # 保持个数一致，防止有些参数未取到
         cursor.execute(insert_sql, item._values.values())
+
+    @staticmethod
+    def create_table(cursor, table='jobbole_artile'):
+        create_sql = """
+        CREATE TABLE `{}` (
+          `url_object_id` varchar(50) NOT NULL,
+          `title` varchar(255) NOT NULL,
+          `create_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+          `url` varchar(300) DEFAULT NULL,
+          `front_image_url` varchar(255) DEFAULT NULL,
+          `front_image_path` varchar(255) DEFAULT NULL,
+          `comment_nums` int(11) NOT NULL DEFAULT '0',
+          `fav_nums` int(11) NOT NULL DEFAULT '0',
+          `praise_nums` int(11) NOT NULL DEFAULT '0',
+          `tags` varchar(255) DEFAULT NULL,
+          `content` longtext NOT NULL,
+          PRIMARY KEY (`url_object_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+      """.format(table)
+
+        cursor.execute(create_sql)
