@@ -19,7 +19,6 @@ except Exception as e:
 # 忽略 urllib3报错
 requests.packages.urllib3.disable_warnings()
 
-
 def check_login(session):
     """传入session对象， 使用地址判断是否登录"""
     # 不允许跳转，不然总是为200
@@ -42,10 +41,10 @@ def get_signature(**kwargs):
     """登录签名，先加载默认字符串"""
     hm = hmac.new(b'd1b964811afb40118a12068ff74a12f4', None, sha1)
     try:
-        hm.update(ensure_bytes(kwargs['client_id']))
         hm.update(ensure_bytes(kwargs['grant_type']))
-        hm.update(ensure_bytes(kwargs['timestamp']))
+        hm.update(ensure_bytes(kwargs['client_id']))
         hm.update(ensure_bytes(kwargs['source']))
+        hm.update(ensure_bytes(kwargs['timestamp']))
     except KeyError as ex:
         print('缺少参数', ex)
     return hm.hexdigest()
@@ -53,8 +52,13 @@ def get_signature(**kwargs):
 
 def sign_in(session, post_data):
     """实际登录api"""
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
+               'HOST': 'www.zhihu.com', 'Referer': 'https://www.zhihu.com/signin?next=%2F',
+               'Authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20'}
     post_url = 'https://www.zhihu.com/api/v3/oauth/sign_in'
-    session.post(post_url, data=post_data, verify=False)
+    # response = session.post(post_url, data=post_data, verify=False)
+    response = session.post(post_url, data=post_data, headers=
+    headers, verify=False)
     if check_login(session):
         session.cookies.save(ignore_expires=True, ignore_discard=True)
         return True
@@ -92,6 +96,7 @@ def log_in(username, password, session, post_data):
             # im.close()
             os.remove(filename)
             data = {'input_text': captcha}
+            post_data['captcha'] = captcha
             response = session.post('https://www.zhihu.com/api/v3/oauth/captcha?lang=en', data=data, verify=False)
             try:
                 result = response.json()
@@ -117,9 +122,9 @@ def main(username, password):
     """登录封装, 登录成功，返回session，失败则为None"""
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
         'HOST': 'www.zhihu.com',
-        'Referer': 'https://www.zhihu.com/signin?next=%2F',
+        'Referer': 'https://www.zhihu.com/',
         'Authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20'
     }
 
@@ -136,6 +141,7 @@ def main(username, password):
         'ref_source': 'homepage',
         'utm_source': ''
     }
+
     # 使用session 登录
     session = requests.Session()
     session.headers = headers
