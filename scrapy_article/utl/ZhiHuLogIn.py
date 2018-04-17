@@ -32,7 +32,7 @@ class ZhiHu:
 
     login_url = 'https://www.zhihu.com/api/v3/oauth/sign_in'
     captcha_url = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
-    check_url = 'https://www.zhihu.com/people/a-li-2-63-13/activities'
+    check_url = 'https://www.zhihu.com/inbox'
     post_data = {
         'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
         'grant_type': 'password',
@@ -68,21 +68,29 @@ class ZhiHu:
         self.session.headers = self.headers
         self.cookie_file = cookie_file
         self.session.cookies = cookielib.LWPCookieJar(filename=self.cookie_file)
+        self.username = account
+        self.password = password
+        self.check_count = 0
         try:
             self.session.cookies.load(ignore_discard=True, ignore_expires=True)
             print('cookie信息加载成功')
         except FileNotFoundError:
             print("cookie信息加载失败")
-            self.check_count = 0
-            self.post_data['username'] = account
-            self.post_data['password'] = password
-            self.post_data['captcha'] = self.check_captcha()
-            self.post_data['signature'] = self.get_signature()
-            self.sign_in()
+            self.login()
         else:
             if not self.check_login():
                 print('cookie登录失败，即将重新登录')
+                self.login()
         # self.check_login()
+
+    def login(self):
+        """整个登录过程"""
+        self.check_count = 0
+        self.post_data['username'] = self.username
+        self.post_data['password'] = self.password
+        self.post_data['captcha'] = self.check_captcha()
+        self.post_data['signature'] = self.get_signature()
+        self.sign_in()
 
     def check_login(self):
         """传入session对象， 使用地址判断是否登录"""
@@ -170,5 +178,7 @@ class ZhiHu:
 
 
 if __name__ == '__main__':
-    login = ZhiHu('18516157608', '******')
-    print(login.session.get(login.check_url).text)
+    login = ZhiHu('18516157608', '*****')
+    print(login.session.get(login.check_url, allow_redirects=False).status_code)
+    # 未登录的为302
+    print(requests.get('https://www.zhihu.com/inbox', headers=ZhiHu.headers, allow_redirects=False).status_code)

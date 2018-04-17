@@ -166,4 +166,6 @@ def main(username, password):
 if __name__ == '__main__':
     s = main('18516157608', '******')
     # 请求用户信息，正常即说明登录成功，和check_login 异曲同工
-    print(s.get('https://www.zhihu.com/people/a-li-2-63-13/activities').text)
+    print(s.get('https://www.zhihu.com/inbox').status_code)
+    # 未登录的为302
+    print(requests.get('https://www.zhihu.com/inbox',headers=s.headers, allow_redirects=False).status_code)
