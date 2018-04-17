@@ -149,8 +149,8 @@ def main(username, password):
     try:
         session.cookies.load(ignore_discard=True, ignore_expires=True)
         print('cookie信息加载成功')
-    except Exception as e:
-        print("cookie信息加载失败")
+    except FileNotFoundError as e:
+        print("cookie信息加载失败", e)
         if log_in(username, password, session, post_data):
             return session
     else:
