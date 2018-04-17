@@ -161,4 +161,7 @@ class MysqlTwistedPipeline:
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
       """.format(table)
 
-        cursor.execute(create_sql)
+        try:
+            cursor.execute(create_sql)
+        except Exception as e:
+            print(e)
