@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import re
+from urllib import parse
 import scrapy
 import time
 from hashlib import sha1
 import hmac
-
-
+from scrapy_article.utl.load_cookie import load_cookie, get_dict_cookie
+from scrapy.loader import ItemLoader
+from scrapy_article.items import QuestionItem, AnswerItem
+from functools import partial
 
 
 class ZhihuSpider(scrapy.Spider):
@@ -36,19 +40,40 @@ class ZhihuSpider(scrapy.Spider):
     }
 
     def parse(self, response):
+        """
+        提取页面所有的url， 并跟踪url进一步爬取
+        如果url格式为 、question/xxxxxx 就下载，进入解析函数
+        """
+        all_urls = response.css('a::attr(href)').extract()
+        all_urls = (parse.urljoin(response.url, url) for url in all_urls if 'javascript' not in url)
+        for url in all_urls:
+            'https://www.zhihu.com/question/invited'
+            match_str = re.findall(r'(.*(?:question)/(\d+))(?:/|$)', url)
+            if match_str:
+                question_url, question_id = match_str[0]
+                yield scrapy.Request(question_url, headers=self.headers, callback=self.parse_detail)
+                print(match_str)
+            pass
+
+    def parse_detail(self, response):
         pass
 
     def start_requests(self):
         self.post_data['signature'] = self.get_signature()
 
-        return [scrapy.Request(url=self.check_url, headers=self.headers, method='GET', dont_filter=True,
-                               callback=self.check_login)]
+        return [scrapy.Request(url=self.check_url, headers=self.headers, method='GET', meta={'dont_redirect': True},
+                               cookies=load_cookie(), callback=self.check_login)]
 
     def check_login(self, response):
-        """实测，用requests登录过，会保存cookie，scrapy也可使用，暂时不考虑scrapy登录"""
+        """用requests登录过，会保存cookie，传入scrapy使用，暂时不考虑scrapy登录"""
         if response.status < 300:
+            print('登录成功')
             for url in self.start_urls:
                 yield scrapy.Request(url, dont_filter=True, headers=self.headers)
+        else:
+            print('未登录,即将拉取验证码，重新登录')
+            yield [scrapy.Request(url=self.check_url, headers=self.headers, method='GET', meta={'dont_redirect': True},
+                                  cookies=get_dict_cookie(), callback=self.check_login)]
 
     def get_signature(self):
         """知乎登录签名，先加载默认字符串

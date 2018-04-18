@@ -178,7 +178,7 @@ class ZhiHu:
 
 
 if __name__ == '__main__':
-    login = ZhiHu('18516157608', '*****')
+    login = ZhiHu('18516157608', '123qaz')
     print(login.session.get(login.check_url, allow_redirects=False).status_code)
     # 未登录的为302
     print(requests.get('https://www.zhihu.com/inbox', headers=ZhiHu.headers, allow_redirects=False).status_code)
