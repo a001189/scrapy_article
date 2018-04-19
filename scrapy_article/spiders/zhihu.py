@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
+import datetime
+import json
 from urllib import parse
 import scrapy
 import time
@@ -15,6 +17,9 @@ class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
     start_urls = ['https://www.zhihu.com/']
+    # question的第一页answer的请求url
+    start_answer_url = "https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccollapsed_counts%2Creviewing_comments_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B%2A%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}"
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
         'HOST': 'www.zhihu.com',
@@ -51,12 +56,67 @@ class ZhihuSpider(scrapy.Spider):
             match_str = re.findall(r'(.*(?:question)/(\d+))(?:/|$)', url)
             if match_str:
                 question_url, question_id = match_str[0]
-                yield scrapy.Request(question_url, headers=self.headers, callback=self.parse_detail)
-                print(match_str)
-            pass
+                if question_id not in question_id_pool:
+                    print(question_url)
+                    # with open('question_url.txt', 'w+') as f:
+                    #     f.write(question_id + ':' + question_url + '\n')
+                    question_id_pool.append(question_id)
+                    yield scrapy.Request(question_url, headers=self.headers, meta={'question_id': question_id},
+                                         callback=self.question_detail)
+                    # yield scrapy.Request(question_url, headers=self.headers, callback=self.parse)
+                else:
+                    # print('%s already exists' % question_id)
+                    pass
+            else:
+                yield scrapy.Request(url=url, headers=self.headers, dont_filter=True)
 
-    def parse_detail(self, response):
+    def question_detail(self, response):
+        """
+        scrapy shell -s USER_AGENT="Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0" https://www.zhihu.com/question/22044254
+
+
+        """
+        loader = ItemLoader(item=QuestionItem(), response=response)
+        loader.add_value('zhihu_id', response.meta.get('question_id'))
+        loader.add_css('title', '.QuestionHeader-title::text')
+        loader.add_css('content', '.QuestionHeader-detail span::text')
+        loader.add_value("url", response.url)
+        loader.add_css("answer_num", ".List-headerText span::text")
+        loader.add_css("comments_num", ".QuestionHeader-Comment button::text")
+        loader.add_css('watch_user_num', '.NumberBoard-itemValue::text')
+        loader.add_css('click_num', '.NumberBoard-itemValue::text')
+        loader.add_css('topics', '.QuestionTopic div::text')
+        loader.add_value('crawl_time', datetime.datetime.now())
+        question_item = loader.load_item()
+        yield scrapy.Request(url=self.start_answer_url.format(response.meta.get('question_id'), 20, 0),
+                             headers=self.headers, callback=self.answer_detail)
+        yield question_item
         pass
+
+    def answer_detail(self, response):
+        pass
+        ans_json = json.loads(response.text)
+        is_end = ans_json["paging"]["is_end"]
+        next_url = ans_json["paging"]["next"]
+
+        # 提取answer的具体字段
+        for answer in ans_json["data"]:
+            answer_item = AnswerItem()
+            answer_item["zhihu_id"] = answer["id"]
+            answer_item["url"] = answer["url"]
+            answer_item["question_id"] = answer["question"]["id"]
+            answer_item["author_id"] = answer["author"]["id"] if "id" in answer["author"] else None
+            answer_item["content"] = answer["content"] if "content" in answer else None
+            answer_item["praise_num"] = answer["voteup_count"]
+            answer_item["comments_num"] = answer["comment_count"]
+            answer_item["create_time"] = answer["created_time"]
+            answer_item["update_time"] = answer["updated_time"]
+            answer_item["crawl_time"] = datetime.datetime.now()
+            print(answer_item.fields.keys()-answer_item.keys())
+            yield answer_item
+        if not is_end:
+            yield scrapy.Request(next_url, headers=self.headers, callback=self.answer_detail)
+
 
     def start_requests(self):
         self.post_data['signature'] = self.get_signature()

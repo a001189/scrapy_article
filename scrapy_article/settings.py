@@ -67,11 +67,11 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
    # 'scrapy_article.pipelines.ScrapyArticlePipeline': 300,
     # 'scrapy.pipelines.images.ImagesPipeline': 1,
-    'scrapy_article.pipelines.ImageJobbolePipeline': 1,
+    # 'scrapy_article.pipelines.ImageJobbolePipeline': 1,
     # 'scrapy_article.pipelines.JsonJobbolePipline': 10,
     # 'scrapy_article.pipelines.JsonJobboleExportPipline': 10,
     # 'scrapy_article.pipelines.MysqlPipeline': 10,
-    'scrapy_article.pipelines.MysqlTwistedPipeline': 10,
+    # 'scrapy_article.pipelines.MysqlTwistedPipeline': 10,
 }
 IMAGES_RESULT_FIELD = 'front_image_path'
 IMAGES_URLS_FIELD = 'front_image_url'

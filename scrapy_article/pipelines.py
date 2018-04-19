@@ -27,11 +27,11 @@ class ImageJobbolePipeline(ImagesPipeline):
                 if ok:
                     item[self.images_result_field] = x['path']
             # imagepipeline 下载 item 必须为数组，下载过后，变为str
-        item['front_image_url'] = str(item['front_image_url']).strip('[]')
+            item['front_image_url'] = str(item['front_image_url']).strip('[]')
         # 可能存在部分没有图片，或无法访问的情况，设置为'',
         # 如：http://tech-blog.oss-cn-hangzhou.aliyuncs.com/requirements-specification-apes-dog-fight.jpg
-        if not item['front_image_url']:
-            item['front_image_url'] = ''
+            if not item['front_image_url']:
+                item['front_image_url'] = ''
         return item
     # 以下函数会覆盖上面的函数
     # def process_item(self, item, spider):
@@ -57,6 +57,7 @@ class JsonJobbolePipline:
 class JsonJobboleExportPipline(JsonItemExporter):
     """scrapy自身提供的json保存接口"""
     def __init__(self):
+        super().__init__()
         self.file = open('articl_export.json', 'wb')
         self.exportor = JsonItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
         self.exportor.start_exporting()

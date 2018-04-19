@@ -102,7 +102,7 @@ class QuestionItem(scrapy.Item):
     url = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
-    anser_num = scrapy.Field()
+    answer_num = scrapy.Field()
     comments_num = scrapy.Field()
     watch_user_num = scrapy.Field()
     click_num = scrapy.Field()
