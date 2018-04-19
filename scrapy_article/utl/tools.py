@@ -5,7 +5,7 @@
 from collections import Sequence
 
 
-def get(squence=None, index=0, default=0):
+def get_index(squence=None, index=0, default=0):
     if not isinstance(squence, Sequence):
         raise TypeError('sequence must be a Sequence')
     try:

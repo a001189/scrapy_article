@@ -79,15 +79,7 @@ class MysqlPipeline:
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
-        col_names = ','.join(item._values.keys())
-        # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
-
-        insert_sql = """
-            insert into jobbole_artile({0}) 
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """.format(col_names)
-
-        self.cursor.execute(insert_sql, item._values.values())
+        item.get_sql()
         self.conn.commit()
 
     def close_spider(self, spider):
@@ -116,7 +108,8 @@ class MysqlTwistedPipeline:
     def process_item(self, item, spider):
         """twsited 异步插入sql"""
         # 增加无法下载图片的本地地址
-        item['front_image_path'] = item['front_image_path'] or 'null'
+        if item.__class__.__name__ == 'JobboleArticleItemTwo':
+            item['front_image_path'] = item['front_image_path'] or 'null'
         qurey = self.dbpool.runInteraction(self.do_insert, item)
         # 错误处理
         qurey.addErrback(self.handle_error, item, spider)
@@ -131,17 +124,24 @@ class MysqlTwistedPipeline:
         #     print(key, value, sep=': ')
         pass
 
-
     def do_insert(self, cursor, item):
-        col_names = ','.join(item._values.keys())
-        # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
-        # 占位符
-        num_s = ('%s,' * len(item._values.keys())).strip(',')
-        insert_sql = """
-                    insert into jobbole_artile({0}) 
-                    VALUES({1})
-                """.format(col_names, num_s)  # 保持个数一致，防止有些参数未取到
-        cursor.execute(insert_sql, item._values.values())
+        if item.__class__.__name__ == 'JobboleArticleItemTwo':
+            # 保留jobbole的爬取sql插入方式
+            col_names = ','.join(item._values.keys())
+            # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
+            # 占位符
+            num_s = ('%s,' * len(item._values.keys())).strip(',')
+            insert_sql = """
+                                insert into jobbole_artile({0}) 
+                                VALUES({1})
+                            """.format(col_names, num_s)  # 保持个数一致，防止有些参数未取到
+            cursor.execute(insert_sql, item._values.values())
+        else:
+
+            insert_sql = item.get_sql()
+            print(insert_sql)
+            # values = (item[x] for x in item.fields.keys())
+            cursor.execute(insert_sql)
 
     @staticmethod
     def create_table(cursor, table='jobbole_artile'):

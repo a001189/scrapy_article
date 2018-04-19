@@ -71,7 +71,7 @@ ITEM_PIPELINES = {
     # 'scrapy_article.pipelines.JsonJobbolePipline': 10,
     # 'scrapy_article.pipelines.JsonJobboleExportPipline': 10,
     # 'scrapy_article.pipelines.MysqlPipeline': 10,
-    # 'scrapy_article.pipelines.MysqlTwistedPipeline': 10,
+    'scrapy_article.pipelines.MysqlTwistedPipeline': 10,
 }
 IMAGES_RESULT_FIELD = 'front_image_path'
 IMAGES_URLS_FIELD = 'front_image_url'
@@ -105,3 +105,6 @@ MYSQL_INFO = dict(
     charset='utf8',
     use_unicode=True,
     )
+
+SQL_DATE_TIME = '%Y-%m-%d %H:%M:%S'
+SQL_DATE = '%Y-%m-%d'
