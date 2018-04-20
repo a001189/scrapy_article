@@ -141,7 +141,7 @@ class MysqlTwistedPipeline:
             insert_sql = item.get_sql()
             print(insert_sql)
             # values = (item[x] for x in item.fields.keys())
-            cursor.execute(insert_sql)
+            cursor.execute(insert_sql, item.values())
 
     @staticmethod
     def create_table(cursor, table='jobbole_artile'):

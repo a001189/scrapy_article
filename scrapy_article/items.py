@@ -65,9 +65,9 @@ def on_duplicate_sql(*args, item: scrapy.Item):
 
         for index, key in enumerate(args):
             if index == 0:
-                update_str = '  ON DUPLICATE KEY UPDATE {}=VALUES({})'.format(key, item.get(key))
+                update_str = '  ON DUPLICATE KEY UPDATE {}="{}"'.format(key, item.get(key))
             else:
-                update_str = '{}=VALUES("{}")'.format(key, item.get(key))
+                update_str = '{}="{}"'.format(key, item.get(key))
             dup_keys.append(update_str)
         return ', '.join(dup_keys)
     else:
@@ -171,66 +171,80 @@ class QuestionItem(scrapy.Item):
     )
 
     def get_sql(self):
-        col_names = ','.join(self.fields.keys())
+        # col_names = ','.join(self.fields.keys())
         # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
         # 占位符
         num_s = ('%s,' * len(self.fields.keys())).strip(',')
-        # 添加values
-        values = ", ".join(str(self[x]) for x in self.fields.keys())
-
+        # # 添加values
+        # values = ", ".join(str(self[x]) for x in self.fields.keys())
         mark = ",".join("'{}'" for _ in self.fields.keys())
         insert_sql = """
                    insert into  question ({}) 
                    VALUES({})
-                   """.format(mark.replace("'", ''), mark)  # 保持个数一致，防止有些参数未取到;
-        print(insert_sql)
-        insert_sql = insert_sql.format(*self.keys(), *self.values())
-        print(insert_sql)
+                   """.format(mark.replace("'", ''), num_s)  # 保持个数一致，防止有些参数未取到;
+        insert_sql = insert_sql.format(*self.keys())
 
         #  添加重复字段更新
         dup_str = on_duplicate_sql('crawl_update_time', 'watch_user_num', 'click_num', 'comments_num',
                                    item=self)
-        print(dup_str)
-        print('-' * 40)
-        print(insert_sql + dup_str)
         return insert_sql + dup_str
 
 class AnswerItem(scrapy.Item):
     """知乎answer item"""
-    zhihu_id = scrapy.Field()
-    url = scrapy.Field()
-    question_id = scrapy.Field()
-    author_id = scrapy.Field()
-    content = scrapy.Field()
-    praise_num = scrapy.Field()
-    comments_num = scrapy.Field()
+    zhihu_id = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    url = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    question_id = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    author_id = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    content = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    praise_num = scrapy.Field(
+        # output_processor=TakeFirst
+    )
+    comments_num = scrapy.Field(
+        # output_processor=TakeFirst
+    )
     create_time = scrapy.Field(
-        input_processor=MapCompose(time.localtime, date_time_convert),
-        output_processor=TakeFirst
+        input_processor=MapCompose(int, time.localtime, date_time_convert),
+        # output_processor=TakeFirst
     )
     update_time = scrapy.Field(
-        input_processor=MapCompose(time.localtime, date_time_convert),
-        output_processor=TakeFirst
+        input_processor=MapCompose(int, time.localtime, date_time_convert),
+        # output_processor=TakeFirst
     )
     crawl_time = scrapy.Field(
         input_processor=MapCompose(date_time_convert),
-        output_processor=TakeFirst
+        # output_processor=TakeFirst
     )
     crawl_update_time = scrapy.Field(
         input_processor=MapCompose(date_time_convert),
-        output_processor=TakeFirst
+        # output_processor=TakeFirst
     )
 
     def get_sql(self):
-        col_names = ','.join(self.fields.keys())
+        """ 暂时未考虑重复代码问题"""
+        # col_names = ','.join(self.fields.keys())
         # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
         # 占位符
         num_s = ('%s,' * len(self.fields.keys())).strip(',')
+        # # 添加values
+        # values = ", ".join(str(self[x]) for x in self.fields.keys())
+        mark = ",".join("'{}'" for _ in self.fields.keys())
         insert_sql = """
-                   insert into  answer ({0})
-                   VALUES({1})
-                   """.format(col_names, num_s)  # 保持个数一致，防止有些参数未取到
+                   insert into  answer ({}) 
+                   VALUES({})
+                   """.format(mark.replace("'", ''), num_s)  # 保持个数一致，防止有些参数未取到;
+        insert_sql = insert_sql.format(*self.keys())
 
+        #  添加重复字段更新
         dup_str = on_duplicate_sql('crawl_update_time', 'update_time', 'praise_num', 'comments_num',
                                    item=self)
         return insert_sql + dup_str
