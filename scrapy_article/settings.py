@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
+BASE_DIR = os.path.realpath(os.path.dirname(__file__))
+print(BASE_DIR)
+sys.path.insert(0, BASE_DIR)
 # Scrapy settings for scrapy_article project
 #
 # For simplicity, this file contains only settings considered important or

@@ -79,6 +79,10 @@ def add_jobbole(value):
     return 'jobbole_' + value
 
 
+replace_splash = lambda x: x
+handle_strip = replace_splash
+
+remove_tags, handle_jobaddr = handle_strip, handle_strip
 class ScrapyArticleItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
@@ -248,3 +252,48 @@ class AnswerItem(scrapy.Item):
         dup_str = on_duplicate_sql('crawl_update_time', 'update_time', 'praise_num', 'comments_num',
                                    item=self)
         return insert_sql + dup_str
+
+
+class LagouJobItem(scrapy.Item):
+    #拉勾网职位
+    title = scrapy.Field()
+    url = scrapy.Field()
+    salary = scrapy.Field()
+    job_city = scrapy.Field(
+        input_processor=MapCompose(replace_splash),
+    )
+    work_years = scrapy.Field(
+        input_processor=MapCompose(replace_splash),
+    )
+    degree_need = scrapy.Field(
+        input_processor=MapCompose(replace_splash),
+    )
+    job_type = scrapy.Field()
+    publish_time = scrapy.Field()
+    job_advantage = scrapy.Field()
+    job_desc = scrapy.Field(
+        input_processor=MapCompose(handle_strip),
+    )
+    job_addr = scrapy.Field(
+        input_processor=MapCompose(remove_tags, handle_jobaddr),
+    )
+    company_name = scrapy.Field(
+        input_processor=MapCompose(handle_strip),
+    )
+    company_url = scrapy.Field()
+    crawl_time = scrapy.Field()
+    crawl_update_time = scrapy.Field()
+
+    def get_sql(self):
+        insert_sql = """
+            insert into lagou_job(title, url, salary, job_city, work_years, degree_need,
+            job_type, publish_time, job_advantage, job_desc, job_addr, company_url, company_name, job_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE job_desc=VALUES(job_desc)
+        """
+
+        job_id = get_num(self["url"])
+        params = (self["title"], self["url"], self["salary"], self["job_city"], self["work_years"], self["degree_need"],
+                  self["job_type"], self["publish_time"], self["job_advantage"], self["job_desc"], self["job_addr"], self["company_url"],
+                  self["company_name"], job_id)
+
+        return insert_sql, params
