@@ -17,6 +17,14 @@ def get_md5(word):
     return md5.hexdigest()
 
 
+def get_lagou(password):
+    print(get_md5(password))
+    return get_md5('veenike' + get_md5(password) + 'veenike')
+
+
 if __name__ == '__main__':
     print(get_md5('你好'))
     print(get_md5(b'hello'))
+    print(get_md5(''))
+    print(get_lagou('123qaz'))
+

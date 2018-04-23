@@ -134,8 +134,6 @@ class JobboleArticleItemTwo(scrapy.Item):
     content = scrapy.Field()
 
 
-
-
 class JobboleItemLoader(ItemLoader):
     """ 默认提取第一个值"""
     default_output_processor = TakeFirst()
@@ -192,6 +190,7 @@ class QuestionItem(scrapy.Item):
         dup_str = on_duplicate_sql('crawl_update_time', 'watch_user_num', 'click_num', 'comments_num',
                                    item=self)
         return insert_sql + dup_str
+
 
 class AnswerItem(scrapy.Item):
     """知乎answer item"""
@@ -255,7 +254,7 @@ class AnswerItem(scrapy.Item):
 
 
 class LagouJobItem(scrapy.Item):
-    #拉勾网职位
+    # 拉勾网职位
     title = scrapy.Field()
     url = scrapy.Field()
     salary = scrapy.Field()
@@ -297,3 +296,7 @@ class LagouJobItem(scrapy.Item):
                   self["company_name"], job_id)
 
         return insert_sql, params
+
+
+class LagouJobItemLoader(JobboleItemLoader):
+    pass
