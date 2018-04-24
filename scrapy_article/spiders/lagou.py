@@ -14,6 +14,7 @@ class LagouSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(allow=("zhaopin/.*",)), follow=True),
+        Rule(LinkExtractor(allow=("passport.lagou.com/.*",)), follow=False),
         Rule(LinkExtractor(allow=("gongsi/j\d+.html",)), follow=True),
         Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_item', follow=True),
 

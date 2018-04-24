@@ -12,6 +12,7 @@ scrapy = "*"
 "pypiwin32" = "*"
 mysqlclient = "*"
 pillow = "*"
+fake-useragent = "*"
 
 
 [dev-packages]

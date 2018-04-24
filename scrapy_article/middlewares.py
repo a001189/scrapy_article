@@ -118,9 +118,14 @@ class LagouDownloaderMiddleware(object):
     def process_request(self, request, spider):
         us = getattr(self.us, self.us_type)
         header = {
-            'Host': 'www.lagou.com',
-            'User-Agent': us,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.9',
+            'Pragma': 'no-cache',
             'Referer': 'https://www.lagou.com',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)'
+                          ' Chrome/64.0.3282.140 Safari/537.36',
+            'Origin': 'https://passport.lagou.com'
         }
 
         request.headers.update(header)

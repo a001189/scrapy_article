@@ -13,6 +13,8 @@ from scrapy.loader.processors import MapCompose, Join, TakeFirst
 from settings import SQL_DATE, SQL_DATE_TIME
 from functools import partial
 from utl.tools import get_index
+from w3lib.html import remove_tags
+
 
 TakeLast = partial(get_index, index=-1, default=0)
 
@@ -78,11 +80,20 @@ def on_duplicate_sql(*args, item: scrapy.Item):
 def add_jobbole(value):
     return 'jobbole_' + value
 
+def replace_splash(value):
+    """去除斜线"""
+    return value.replace('/', '')
 
-replace_splash = lambda x: x
-handle_strip = replace_splash
 
-remove_tags, handle_jobaddr = handle_strip, handle_strip
+def handle_jobaddr(value):
+    """地址处理"""
+    return ''.join(x.strip() for x in value.split('\n') if '查看地图' not in x)
+
+
+def handle_strip(value):
+    return value
+
+
 class ScrapyArticleItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
@@ -257,6 +268,8 @@ class LagouJobItem(scrapy.Item):
     # 拉勾网职位
     title = scrapy.Field()
     url = scrapy.Field()
+    url_object_id = scrapy.Field()
+    tags = scrapy.Field()
     salary = scrapy.Field()
     job_city = scrapy.Field(
         input_processor=MapCompose(replace_splash),
@@ -283,20 +296,36 @@ class LagouJobItem(scrapy.Item):
     crawl_time = scrapy.Field()
     crawl_update_time = scrapy.Field()
 
+    # def get_sql(self):
+    #     insert_sql = """
+    #         insert into lagou_job(title, url, salary, job_city, work_years, degree_need,
+    #         job_type, publish_time, job_advantage, job_desc, job_addr, company_url, company_name, job_id)
+    #         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE job_desc=VALUES(job_desc)
+    #     """
+    #
+    #     job_id = get_num(self["url"])
+    #     params = (self["title"], self["url"], self["salary"], self["job_city"], self["work_years"], self["degree_need"],
+    #               self["job_type"], self["publish_time"], self["job_advantage"], self["job_desc"], self["job_addr"], self["company_url"],
+    #               self["company_name"], job_id)
+    #
+    #     return insert_sql, params
     def get_sql(self):
+        # col_names = ','.join(self.fields.keys())
+        # print(item._values.keys(),len(list(item._values.keys())),sep='\n')
+        # 占位符
+        num_s = ('%s,' * len(self.keys())).strip(',')
+        # # 添加values
+        # values = ", ".join(str(self[x]) for x in self.fields.keys())
+        mark = ",".join("'{}'" for _ in self.keys())
         insert_sql = """
-            insert into lagou_job(title, url, salary, job_city, work_years, degree_need,
-            job_type, publish_time, job_advantage, job_desc, job_addr, company_url, company_name, job_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE job_desc=VALUES(job_desc)
-        """
+                   insert into  lagou ({}) 
+                   VALUES({})
+                   """.format(mark.replace("'", ''), num_s)  # 保持个数一致，防止有些参数未取到;
+        insert_sql = insert_sql.format(*self.keys())
 
-        job_id = get_num(self["url"])
-        params = (self["title"], self["url"], self["salary"], self["job_city"], self["work_years"], self["degree_need"],
-                  self["job_type"], self["publish_time"], self["job_advantage"], self["job_desc"], self["job_addr"], self["company_url"],
-                  self["company_name"], job_id)
-
-        return insert_sql, params
-
+        #  添加重复字段更新
+        dup_str = on_duplicate_sql('crawl_update_time', item=self)
+        return insert_sql + dup_str
 
 class LagouJobItemLoader(JobboleItemLoader):
     pass

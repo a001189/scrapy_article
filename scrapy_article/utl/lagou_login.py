@@ -46,12 +46,12 @@ def login(account, password):
     session.headers = header
     # 获取动态请求头,并添加进去
     response = session.get(login_url)
-    session.headers['X-Anit-Forge-Token'] = re.findall("window.X_Anti_Forge_Token.*'(.*?)'", response.text)[0]
-    session.headers['X_Anti_Forge_Code'] = re.findall("window.X_Anti_Forge_Code.*'(.*?)'", response.text)[0]
+    # session.headers['X-Anit-Forge-Token'] = re.findall("window.X_Anti_Forge_Token.*'(.*?)'", response.text)[0]
+    # session.headers['X_Anti_Forge_Code'] = re.findall("window.X_Anti_Forge_Code.*'(.*?)'", response.text)[0]
     response_post = session.post(post_url, data=post_data)
-    del session.headers['X-Anit-Forge-Token']
-    del session.headers['X_Anti_Forge_Code']
-    s = session.get('https://www.lagou.com/jobs/4096761.html', allow_redirects=False)
+    # del session.headers['X-Anit-Forge-Token']
+    # del session.headers['X_Anti_Forge_Code']
+    s = session.get('https://www.lagou.com/jobs/4096761.html', allow_redirects=True)
     # print(response_post.status_code,response_post.text)
 
     print(s.text)
