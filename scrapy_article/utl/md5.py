@@ -18,7 +18,6 @@ def get_md5(word):
 
 
 def get_lagou(password):
-    print(get_md5(password))
     return get_md5('veenike' + get_md5(password) + 'veenike')
 
 
