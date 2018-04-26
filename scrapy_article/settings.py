@@ -113,3 +113,6 @@ MYSQL_INFO = dict(
 
 SQL_DATE_TIME = '%Y-%m-%d %H:%M:%S'
 SQL_DATE = '%Y-%m-%d'
+
+# 重定向
+REDIRECT_ENABLED = False
