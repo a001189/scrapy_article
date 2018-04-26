@@ -10,11 +10,12 @@ from scrapy_article.items import LagouJobItem, LagouJobItemLoader
 class LagouSpider(CrawlSpider):
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
-    start_urls = ['https://www.lagou.com/jobs/3815162.html']
+    start_urls = ['https://www.lagou.com']
+    start_urls = ['https://www.lagou.com/jobs/list_python?labelWords=&fromSearch=true&suginput=']
 
     rules = (
-        Rule(LinkExtractor(allow=("zhaopin/.*",)), follow=True),
         Rule(LinkExtractor(allow=("passport.lagou.com/.*",)), follow=False),
+        Rule(LinkExtractor(allow=("zhaopin/.*",)), follow=True),
         Rule(LinkExtractor(allow=("gongsi/j\d+.html",)), follow=True),
         Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_item', follow=True),
 
