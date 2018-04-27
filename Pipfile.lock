@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ddc9d4cd53e5d6e3db7e91dc8e451a39b34efc24698f2f19e6b9b0ae62283d83"
+            "sha256": "1be31ec604000066765356076eea60a4098c4f7f186f3a57bbd71c16a47b7d29"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -137,6 +137,10 @@
         "scrapy": {
             "hashes": [],
             "version": "==1.5.0"
+        },
+        "selenium": {
+            "hashes": [],
+            "version": "==3.11.0"
         },
         "service-identity": {
             "hashes": [],

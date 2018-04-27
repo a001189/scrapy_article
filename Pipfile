@@ -13,6 +13,7 @@ scrapy = "*"
 mysqlclient = "*"
 pillow = "*"
 fake-useragent = "*"
+selenium = "*"
 
 
 [dev-packages]
