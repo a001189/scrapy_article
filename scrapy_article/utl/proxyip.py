@@ -73,14 +73,22 @@ class MysqlCoonection:
     def __init__(self):
         self.con = MySQLdb.connect(**self.MYSQL_INFO)
 
-    def do_sql(self,sql):
+    def do_sql(self, sql):
         con = self.con
         cursor = con.cursor()
         cursor.execute(sql)
         con.commit()
+    def do_select(self, sql):
+        con = self.con
+        cursor = con.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+        cursor.execute(sql)
+        return cursor.fetchall()
 
-
-def get_ip(url):
+def get_ip(url, **kwargs):
+    # {'id': 2, 'ip': '171.115.238.140', 'port': '61234', 'city': '湖北', 'info': '高匿', 'types': 'HTTP', 'flag': 0}
+    if kwargs:
+        try:
+            types
 
     header = {
         'Host': 'www.xicidaili.com',
@@ -133,5 +141,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-
+    # main()
+    pass
